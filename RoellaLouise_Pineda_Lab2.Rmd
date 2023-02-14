@@ -1,0 +1,76 @@
+---
+title: 'STS 112: Lab 2'
+author: "Roella Louise Pineda"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+In this lab, you will work more with the IPUMS dataset we explored in Notebook 2. You will make several visualizations here, and you will answer questions about them in this week's quiz.
+
+Read in the IPUMS dataset for Week 2. This code block is complete, so you can run it as it is. Unless otherwise specified, all of the remaining code blocks have blanks that you will need to fill in to make them run correctly.
+```{r results = "hide"}
+library(tidyverse)
+ipums <- read_csv("wk2.csv", col_types = cols(CHBORN = col_double()))
+```
+
+## Getting Started
+Use the `names()` function and the `table()` function to remind yourself what variables and years are included in this dataset.
+```{r}
+names(ipums)
+table(ipums$YEAR)
+```
+
+## Age Histograms
+Create a subset of ipums called `i1870` that includes only the records for 1870. **Test that you have done this correctly.**
+```{r}
+#A dataset that includes only the records for 1870
+i1870 <- ipums %>% filter(YEAR == 1870)
+
+#Test
+table(i1870$YEAR)
+```
+For the `i1870` data frame, fill in the blanks to make two histograms of `AGE`. For the first, use `binwidth = 1`. For the second, use `binwidth = 5`. **Don't forget to weight.**
+```{r}
+qplot(AGE, data = i1870, binwidth = 1, weight = PERWT)
+qplot(AGE, data = i1870, binwidth = 5, weight = PERWT)
+```
+
+
+## General and detailed categories
+Using the ipums dataframe, make a scatterplot of `RELATE` and `RELATED`. Facet by `YEAR` and weight by `PERWT`.
+
+```{r}
+#Do you mean this answer?
+qplot(RELATE, RELATED, data = ipums, facets = ~YEAR, weight = PERWT)
+
+#Or this answer?
+qplot(RELATE, data = ipums, facets = ~YEAR, weight = PERWT)
+qplot(RELATED, data = ipums, facets = ~YEAR, weight = PERWT)
+```
+
+## Families and Households
+In censuses, the household is the unit of analysis. We get information about individuals, about who lives with whom, and about relationships among people who live together. We get very little information about family members outside of the household. Make histograms for the `NCHILD` and `CHBORN` variables, faceting by year and using `binwidth = 1`.
+```{r}
+qplot(NCHILD, data = ipums, binwidth = 1, facets = ~YEAR)
+qplot(CHBORN, data = ipums, binwidth = 1, facets = ~YEAR)
+```
+Take a look at the documentation for the `CHBORN` variable on the IPUMS website to see the valid response codes. Create a new data frame called `i1900` that includes only records for the year 1900 and only records with valid responses for `CHBORN`. Create a new variable called `BORN` that accurately represents the number of children born to the person in question. Then, using `i1900`, make a scatterplot of `BORN` and `NCHILD` weighting by `PERWT`.
+```{r}
+i1900 <- ipums %>% filter(YEAR == 1900) %>% mutate(BORN = CHBORN - 1)
+
+#Do you mean this answer? 
+qplot(BORN, NCHILD, data = i1900, weight = PERWT)
+
+#Or this answer? 
+qplot(BORN, data = i1900, weight = PERWT)
+qplot(NCHILD, data = i1900, weight = PERWT)
+```
+Try using `ggplot()` to jitter the points (take a look at Notebook 2 to fill in the blanks).
+```{r}
+ggplot(i1900, aes(BORN, NCHILD, weight = PERWT)) + geom_jitter()
+```
+
+
+## Turn in this assignment
+Make sure you have entered your name in the space at the top and run all code blocks in this document. Save, click the `Preview` button, and make sure the preview looks the way you want it to. Upload the `Lab2.nb.html` file to Canvas.
